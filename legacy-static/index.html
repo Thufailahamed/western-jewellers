@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Western Jewellers — Fine Jewellery, Made to Outlast</title>
+  <meta name="description" content="Western Jewellers. Fine jewellery, bridal and bespoke pieces, made by hand to be passed down." />
+  <meta name="theme-color" content="#0c0b09" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230c0b09'/%3E%3Ctext x='50%25' y='58%25' text-anchor='middle' font-family='Georgia,serif' font-size='30' fill='%23d8b878'%3EWJ%3C/text%3E%3C/svg%3E" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="is-loading">
+
+  <!-- Preloader -->
+  <div class="loader" aria-hidden="true">
+    <div class="loader__mark">
+      <span class="loader__w">W</span><span class="loader__j">J</span>
+    </div>
+    <div class="loader__bar"><span></span></div>
+    <div class="loader__meta">
+      <span>Western Jewellers</span>
+      <span class="loader__count">000</span>
+    </div>
+  </div>
+
+  <!-- Cursor -->
+  <div class="cursor" aria-hidden="true"><span class="cursor__label">View</span></div>
+
+  <!-- Grain -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- WebGL ring -->
+  <canvas class="gl" aria-hidden="true"></canvas>
+
+  <!-- Nav -->
+  <header class="nav">
+    <a href="#top" class="nav__logo" data-magnetic>
+      <span>Western</span><em>Jewellers</em>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#collections" class="roll"><span data-text="Collections">Collections</span></a>
+      <a href="#craft" class="roll"><span data-text="Craft">Craft</span></a>
+      <a href="#signature" class="roll"><span data-text="Signature">Signature</span></a>
+      <a href="#maison" class="roll"><span data-text="Maison">Maison</span></a>
+    </nav>
+    <a href="#appointment" class="btn btn--ghost nav__cta" data-magnetic>
+      <span>Book a viewing</span>
+    </a>
+    <button class="nav__burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
+  </header>
+
+  <div class="menu" aria-hidden="true">
+    <nav class="menu__links">
+      <a href="#collections">Collections</a>
+      <a href="#craft">Craft</a>
+      <a href="#signature">Signature</a>
+      <a href="#maison">Maison</a>
+      <a href="#appointment">Book a viewing</a>
+    </nav>
+  </div>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="hero" data-ring="hero">
+      <div class="hero__meta hero__meta--l">
+        <span class="eyebrow">Fine jewellery</span>
+        <span class="eyebrow">Bridal &amp; Bespoke</span>
+      </div>
+      <div class="hero__meta hero__meta--r">
+        <span class="eyebrow">N° 01 — The Solitaire</span>
+        <span class="eyebrow">18k Yellow Gold</span>
+      </div>
+
+      <h1 class="hero__title">
+        <span class="line"><span>Made to</span></span>
+        <span class="line line--indent"><span><em>outlast</em></span></span>
+        <span class="line line--right"><span>a lifetime</span></span>
+      </h1>
+
+      <div class="hero__foot">
+        <p class="hero__lede reveal">Fine jewellery, cut and set by hand, made to be handed down.</p>
+        <div class="hero__scroll reveal">
+          <span>Scroll</span>
+          <i></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <section class="marquee" aria-label="Disciplines">
+      <div class="marquee__track">
+        <span>Engagement</span><b>✦</b><span><em>Wedding bands</em></span><b>✦</b><span>High jewellery</span><b>✦</b><span><em>Bespoke</em></span><b>✦</b><span>Heritage gold</span><b>✦</b>
+        <span>Engagement</span><b>✦</b><span><em>Wedding bands</em></span><b>✦</b><span>High jewellery</span><b>✦</b><span><em>Bespoke</em></span><b>✦</b><span>Heritage gold</span><b>✦</b>
+      </div>
+    </section>
+
+    <!-- MANIFESTO -->
+    <section class="manifesto" id="maison" data-ring="manifesto">
+      <div class="manifesto__inner">
+        <span class="eyebrow eyebrow--gold">The Maison</span>
+        <p class="manifesto__text split-words">
+          We believe a jewel should hold a memory as well as the light. Every piece that leaves our atelier is drawn, cast, set and polished by the same few pairs of hands, slowly, and with the patience that rare things deserve.
+        </p>
+        <div class="manifesto__sign">
+          <span class="sig">Western</span>
+          <span class="eyebrow">The Founders</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLLECTIONS (horizontal) -->
+    <section class="collections" id="collections">
+      <div class="collections__pin">
+        <div class="collections__head">
+          <span class="eyebrow">Collections</span>
+          <h2 class="h2">Four ways to <br /><em>carry the light</em></h2>
+          <div class="collections__progress"><span></span></div>
+        </div>
+        <div class="collections__track">
+          <article class="card" data-cursor="Explore">
+            <div class="card__media" style="--tint:#e9dfcf">
+              <img alt="Solitaire engagement ring in yellow gold" data-piece="solitaire" />
+            </div>
+            <div class="card__body">
+              <span class="card__num">01</span>
+              <h3>Solitaire</h3>
+              <p>One stone, one promise. Brilliant, oval and emerald cuts, from 0.5 carat.</p>
+            </div>
+          </article>
+          <article class="card" data-cursor="Explore">
+            <div class="card__media" style="--tint:#e3e1dc">
+              <img alt="Diamond eternity band" data-piece="eternity" />
+            </div>
+            <div class="card__body">
+              <span class="card__num">02</span>
+              <h3>Eternity</h3>
+              <p>Bands set all the way round with matched diamonds, every stone chosen by eye.</p>
+            </div>
+          </article>
+          <article class="card" data-cursor="Explore">
+            <div class="card__media" style="--tint:#ece2d2">
+              <img alt="Teardrop diamond pendant" data-piece="pendant" />
+            </div>
+            <div class="card__body">
+              <span class="card__num">03</span>
+              <h3>Lumière</h3>
+              <p>Pendants and drops that sit close to the skin and catch the light as you move.</p>
+            </div>
+          </article>
+          <article class="card" data-cursor="Explore">
+            <div class="card__media" style="--tint:#e6ddcc">
+              <img alt="Gold bangle set with diamonds" data-piece="bangle" />
+            </div>
+            <div class="card__body">
+              <span class="card__num">04</span>
+              <h3>Heritage</h3>
+              <p>Heavy 22k gold, hand-finished. Made to wear every day and to pass down.</p>
+            </div>
+          </article>
+          <div class="collections__end">
+            <p class="h3">Every piece can be<br /><em>made to measure.</em></p>
+            <a href="#appointment" class="btn btn--dark" data-magnetic><span>Start a commission</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRAFT -->
+    <section class="craft" id="craft">
+      <div class="craft__left">
+        <span class="eyebrow eyebrow--gold">The Craft</span>
+        <h2 class="h2">Four hands.<br /><em>Forty hours.</em><br />One ring.</h2>
+        <div class="craft__counter"><span class="craft__current">01</span><span class="craft__total">/04</span></div>
+      </div>
+      <ol class="craft__steps">
+        <li class="step">
+          <span class="step__num">01</span>
+          <h3>Drawn</h3>
+          <p>Every commission starts as a pencil sketch at the bench, drawn with you and changed until it is right.</p>
+        </li>
+        <li class="step">
+          <span class="step__num">02</span>
+          <h3>Cast</h3>
+          <p>Recycled gold and platinum, cast in-house and then hand-forged so the metal is dense and strong.</p>
+        </li>
+        <li class="step">
+          <span class="step__num">03</span>
+          <h3>Set</h3>
+          <p>Each stone is set under the microscope. Claws are shaped one by one to hold it tightly and let in as much light as possible.</p>
+        </li>
+        <li class="step">
+          <span class="step__num">04</span>
+          <h3>Finished</h3>
+          <p>Seven stages of polishing, then a final check under daylight lamps. Then it is boxed and ready for you.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- SIGNATURE -->
+    <section class="signature" id="signature" data-ring="signature">
+      <div class="signature__title">
+        <span class="eyebrow eyebrow--gold">Signature piece</span>
+        <h2 class="display"><span class="line"><span>The</span></span> <span class="line"><span><em>Aurelia</em></span></span></h2>
+      </div>
+      <dl class="specs">
+        <div><dt>Centre stone</dt><dd>2.02 ct</dd></div>
+        <div><dt>Colour / Clarity</dt><dd>D / VVS1</dd></div>
+        <div><dt>Metal</dt><dd>18k Yellow Gold</dd></div>
+        <div><dt>Setting</dt><dd>Six-claw cathedral</dd></div>
+      </dl>
+      <div class="signature__cta">
+        <a href="#appointment" class="btn btn--gold" data-magnetic><span>Request a private viewing</span></a>
+      </div>
+    </section>
+
+    <!-- NUMBERS -->
+    <section class="numbers">
+      <div class="numbers__grid">
+        <div class="stat"><span class="stat__n" data-count="60">0</span><span class="stat__s">+</span><p>Years at the bench</p></div>
+        <div class="stat"><span class="stat__n" data-count="12">0</span><span class="stat__s">k</span><p>Pieces made by hand</p></div>
+        <div class="stat"><span class="stat__n" data-count="100">0</span><span class="stat__s">%</span><p>Conflict-free stones</p></div>
+        <div class="stat"><span class="stat__n" data-count="3">0</span><p>Generations of makers</p></div>
+      </div>
+    </section>
+
+    <!-- QUOTE -->
+    <section class="quote">
+      <blockquote>
+        <p class="split-words">“They didn't sell us a ring. They helped us make one that was ours, and it was perfect.”</p>
+        <footer><span class="eyebrow">Amelia &amp; James — Bespoke commission</span></footer>
+      </blockquote>
+    </section>
+
+    <!-- APPOINTMENT -->
+    <section class="appointment" id="appointment">
+      <div class="appointment__inner">
+        <div class="appointment__copy">
+          <span class="eyebrow eyebrow--gold">Private appointments</span>
+          <h2 class="h2">Come and see<br /><em>the atelier.</em></h2>
+          <p>Sit with one of our makers, hold the stones yourself, and leave with a sketch. Appointments are private and there is no obligation to buy.</p>
+          <ul class="appointment__info">
+            <li><span class="eyebrow">Atelier</span>Visit by appointment</li>
+            <li><span class="eyebrow">Hours</span>Tue – Sat, 10:00 – 18:00</li>
+          </ul>
+        </div>
+        <form class="form" novalidate>
+          <div class="field">
+            <input id="f-name" name="name" type="text" placeholder=" " required autocomplete="name" />
+            <label for="f-name">Your name</label>
+          </div>
+          <div class="field">
+            <input id="f-email" name="email" type="email" placeholder=" " required autocomplete="email" />
+            <label for="f-email">Email address</label>
+          </div>
+          <fieldset class="chips">
+            <legend class="eyebrow">I'm interested in</legend>
+            <label><input type="checkbox" name="interest" value="engagement" /><span>Engagement</span></label>
+            <label><input type="checkbox" name="interest" value="wedding" /><span>Wedding bands</span></label>
+            <label><input type="checkbox" name="interest" value="bespoke" /><span>Bespoke</span></label>
+            <label><input type="checkbox" name="interest" value="heritage" /><span>Heritage gold</span></label>
+          </fieldset>
+          <div class="field">
+            <textarea id="f-msg" name="message" rows="3" placeholder=" "></textarea>
+            <label for="f-msg">Tell us about the piece (optional)</label>
+          </div>
+          <button type="submit" class="btn btn--gold btn--full" data-magnetic><span>Request appointment</span></button>
+          <p class="form__note" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__top">
+      <div>
+        <span class="eyebrow">Newsletter</span>
+        <p class="footer__lede">New collections and atelier news, a few times a year.</p>
+        <form class="footer__news" novalidate>
+          <input type="email" placeholder="Email address" aria-label="Email address" />
+          <button type="submit" aria-label="Subscribe">→</button>
+        </form>
+      </div>
+      <div class="footer__cols">
+        <div>
+          <span class="eyebrow">Explore</span>
+          <a href="#collections" class="roll"><span data-text="Collections">Collections</span></a>
+          <a href="#craft" class="roll"><span data-text="Craft">Craft</span></a>
+          <a href="#signature" class="roll"><span data-text="Signature">Signature</span></a>
+        </div>
+        <div>
+          <span class="eyebrow">Follow</span>
+          <a href="#" class="roll"><span data-text="Instagram">Instagram</span></a>
+          <a href="#" class="roll"><span data-text="Pinterest">Pinterest</span></a>
+          <a href="#" class="roll"><span data-text="Journal">Journal</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__mark" aria-hidden="true">
+      <span>Western</span><em>Jewellers</em>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span class="year"></span> Western Jewellers</span>
+      <span>Ethically sourced · Made by hand</span>
+      <a href="#top" class="roll"><span data-text="Back to top ↑">Back to top ↑</span></a>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

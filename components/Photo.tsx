@@ -1,0 +1,56 @@
+"use client";
+
+import { useRef } from "react";
+import Image, { type ImageLoader } from "next/image";
+import type { Img } from "@/lib/images";
+import { gsap, useGSAP } from "@/lib/gsap";
+
+// Unsplash resizes on its own CDN, so we ask it for the width Next would have requested.
+const unsplash: ImageLoader = ({ src, width, quality }) => `${src}?auto=format&fit=crop&w=${width}&q=${quality ?? 75}`;
+
+type Props = {
+  img: Img;
+  className?: string;
+  sizes?: string;
+  /** Strength of the scroll parallax on the image inside its frame (0 disables it). */
+  parallax?: number;
+  /** Wipe the frame open the first time it scrolls into view. */
+  reveal?: boolean;
+  priority?: boolean;
+  children?: React.ReactNode;
+};
+
+/** A framed photograph: wipes open on first view and drifts slightly inside its frame while scrolling. */
+export function Photo({ img, className, sizes = "100vw", parallax = 0.08, reveal = true, priority, children }: Props) {
+  const root = useRef<HTMLDivElement>(null);
+  useGSAP(
+    () => {
+      const el = root.current!;
+      const inner = el.querySelector(".photo__inner");
+      if (reveal) {
+        gsap.fromTo(
+          el,
+          { clipPath: "inset(100% 0% 0% 0%)" },
+          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: "expo.inOut", scrollTrigger: { trigger: el, start: "top 88%", once: true } }
+        );
+        gsap.fromTo(el.querySelector("img"), { scale: 1.25 }, { scale: 1, duration: 2, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } });
+      }
+      if (parallax && inner) {
+        gsap.fromTo(
+          inner,
+          { yPercent: -parallax * 50 },
+          { yPercent: parallax * 50, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } }
+        );
+      }
+    },
+    { scope: root }
+  );
+  return (
+    <div ref={root} className={`photo${reveal ? " photo--reveal" : ""}${className ? " " + className : ""}`}>
+      <div className="photo__inner" style={{ inset: `${-parallax * 50}% 0` }}>
+        <Image loader={unsplash} src={img.src} alt={img.alt} fill sizes={sizes} priority={priority} />
+      </div>
+      {children}
+    </div>
+  );
+}
