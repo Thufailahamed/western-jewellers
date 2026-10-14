@@ -7,6 +7,7 @@ import { IMG, type ImgKey } from "@/lib/images";
 import { JewelView } from "./three/JewelView";
 import { usePageTransition } from "./Transition";
 import { SplitTitle } from "./anim";
+import { useLenis } from "lenis/react";
 
 /* ------------------------------------------------------------------ Hero: arch that opens to full-bleed */
 
@@ -165,61 +166,169 @@ const CHAPTERS: { n: string; era: string; title: [string, string]; text: string;
 export function Chapters() {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const lenis = useLenis();
+
   useGSAP(
     () => {
-      gsap.utils.toArray<HTMLElement>(".chap", root.current).forEach((el, i) => {
-        ScrollTrigger.create({ trigger: el, start: "top 60%", end: "bottom 60%", onToggle: (s) => s.isActive && setActive(i) });
-        gsap.fromTo(el.querySelectorAll(".chap__in"), { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1.2, ease: "expo.out", stagger: 0.08, scrollTrigger: { trigger: el, start: "top 70%" } });
+      const mm = gsap.matchMedia();
+      // Desktop: the whole section pins and scroll progress picks the chapter.
+      mm.add("(min-width: 1101px)", () => {
+        const fill = root.current!.querySelector<HTMLElement>(".story__fill");
+        ScrollTrigger.create({
+          trigger: root.current,
+          start: "top top",
+          end: "bottom bottom",
+          onUpdate: (s) => {
+            gsap.set(fill, { scaleY: s.progress });
+            setActive(Math.min(CHAPTERS.length - 1, Math.floor(s.progress * CHAPTERS.length)));
+          },
+        });
+        gsap.fromTo(
+          root.current!.querySelector(".story__ring"),
+          { rotate: -40 },
+          { rotate: 220, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom bottom", scrub: 1 } }
+        );
+      });
+      // Mobile: a plain stacked list that rises in as it arrives.
+      mm.add("(max-width: 1100px)", () => {
+        gsap.utils.toArray<HTMLElement>(".chap", root.current).forEach((el) => {
+          gsap.fromTo(el.querySelectorAll(".chap__in"), { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.2, ease: "expo.out", stagger: 0.08, scrollTrigger: { trigger: el, start: "top 80%" } });
+        });
       });
     },
     { scope: root }
   );
 
+  const goTo = (i: number) => {
+    const el = root.current;
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    const y = top + ((i + 0.5) / CHAPTERS.length) * (el.offsetHeight - window.innerHeight);
+    if (lenis) lenis.scrollTo(y, { duration: 1.6 });
+    else window.scrollTo({ top: y, behavior: "smooth" });
+  };
+
+  const next = CHAPTERS[active + 1];
+
   return (
-    <section ref={root} className="chapters">
-      <div className="chapters__stick">
-        <div className="chapters__head">
-          <span className="eyebrow eyebrow--gold">History</span>
-          <SplitTitle className="h2" lines={["Our", <em key="e">story.</em>]} />
-        </div>
-        <div className="chapters__frame">
-          {CHAPTERS.map((c, i) => (
-            <div key={c.n} className={`chapters__slide${i === active ? " is-on" : ""}${i < active ? " is-past" : ""}`}>
-              <Photo img={IMG[c.img]} sizes="(max-width: 1100px) 80vw, 34vw" reveal={false} parallax={0} />
-            </div>
-          ))}
-          <span key={active} className="chapters__numeral" aria-hidden="true">
-            {CHAPTERS[active].n}
-          </span>
-        </div>
-        <div className="chapters__index micro">
+    <section ref={root} className="story" style={{ ["--count" as string]: CHAPTERS.length }}>
+      <div className="story__stage">
+        <div className="story__ghost" aria-hidden="true">
           {CHAPTERS.map((c, i) => (
             <span key={c.n} className={i === active ? "is-on" : i < active ? "is-past" : undefined}>
-              <i />
               {c.n}
             </span>
           ))}
         </div>
-      </div>
-      <ol className="chapters__list">
-        {CHAPTERS.map((c, i) => (
-          <li key={c.n} className={`chap${i === active ? " is-on" : ""}`}>
-            <span className="chap__in chap__era micro">
-              <b>Chapter {c.n}</b>
-              <i />
-              {c.era}
-            </span>
-            <h3 className="chap__in">
-              {c.title[0]} <em>{c.title[1]}</em>
-            </h3>
-            <p className="chap__in">{c.text}</p>
-            <span className="chap__in chap__note micro">{c.note}</span>
-            <div className="chap__in chap__mobile">
-              <Photo img={IMG[c.img]} sizes="80vw" reveal={false} parallax={0} />
+
+        <header className="story__head">
+          <span className="eyebrow eyebrow--gold">History</span>
+          <SplitTitle className="h2" lines={["Our", <em key="e">story.</em>]} />
+        </header>
+
+        <div className="story__count" aria-hidden="true">
+          <span className="story__count-n">
+            {CHAPTERS.map((c, i) => (
+              <b key={c.n} className={i === active ? "is-on" : i < active ? "is-past" : undefined}>
+                0{i + 1}
+              </b>
+            ))}
+          </span>
+          <i />
+          <span className="micro">0{CHAPTERS.length}</span>
+        </div>
+
+        <figure className="story__visual" aria-hidden="true">
+          <div className="story__art">
+            <div className="story__frame">
+              {CHAPTERS.map((c, i) => (
+                <div key={c.n} className={`story__slide${i === active ? " is-on" : ""}${i < active ? " is-past" : ""}`}>
+                  <Photo img={IMG[c.img]} sizes="(max-width: 1100px) 80vw, 34vw" reveal={false} parallax={0} />
+                </div>
+              ))}
+              <span className="story__shade" />
             </div>
-          </li>
-        ))}
-      </ol>
+            <svg className="story__ring" viewBox="0 0 200 200">
+              <defs>
+                <path id="story-ring" d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0" />
+              </defs>
+              <text>
+                <textPath href="#story-ring">Western Jewellers · Since the first bench · Made by hand · </textPath>
+              </text>
+            </svg>
+            <span className="story__seal">
+              {CHAPTERS.map((c, i) => (
+                <em key={c.n} className={i === active ? "is-on" : i < active ? "is-past" : undefined}>
+                  {c.n}
+                </em>
+              ))}
+            </span>
+          </div>
+          <figcaption className="story__fig micro">
+            Fig. {CHAPTERS[active].n} — {IMG[CHAPTERS[active].img].alt}
+          </figcaption>
+        </figure>
+
+        <nav className="story__rail" aria-label="Chapters">
+          <span className="story__track">
+            <span className="story__fill" />
+          </span>
+          {CHAPTERS.map((c, i) => (
+            <button
+              key={c.n}
+              type="button"
+              className={i === active ? "is-on" : i < active ? "is-past" : undefined}
+              onClick={() => goTo(i)}
+              aria-current={i === active ? "step" : undefined}
+            >
+              <span className="story__dot" />
+              <b>{c.n}</b>
+              <span className="micro">{c.era}</span>
+            </button>
+          ))}
+        </nav>
+
+        <ol className="story__list">
+          {CHAPTERS.map((c, i) => (
+            <li key={c.n} className={`chap${i === active ? " is-on" : ""}${i < active ? " is-past" : ""}`}>
+              <span className="chap__in chap__era micro">
+                <b>Chapter {c.n}</b>
+                <i />
+                {c.era}
+              </span>
+              <h3 className="chap__in">
+                <span className="chap__ln">
+                  <span>{c.title[0]}</span>
+                </span>
+                <span className="chap__ln">
+                  <em>{c.title[1]}</em>
+                </span>
+              </h3>
+              <p className="chap__in">{c.text}</p>
+              <span className="chap__in chap__note micro">{c.note}</span>
+              <div className="chap__in chap__mobile">
+                <Photo img={IMG[c.img]} sizes="80vw" reveal={false} parallax={0} />
+                <span className="chap__mobile-n">{c.n}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <button type="button" className="story__next" onClick={() => (next ? goTo(active + 1) : goTo(CHAPTERS.length - 1))} disabled={!next}>
+          <span className="story__next-thumb">
+            {CHAPTERS.map((c, i) => (
+              <span key={c.n} className={i === active + 1 ? "is-on" : undefined}>
+                <Photo img={IMG[c.img]} sizes="120px" reveal={false} parallax={0} />
+              </span>
+            ))}
+          </span>
+          <span className="story__next-txt">
+            <span className="micro">{next ? `Next · Chapter ${next.n}` : "The story continues"}</span>
+            <span className="story__next-era">{next ? next.era : "at the bench, today"}</span>
+          </span>
+          <span className="story__next-arrow" aria-hidden="true">↓</span>
+        </button>
+      </div>
     </section>
   );
 }
