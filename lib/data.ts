@@ -24,6 +24,9 @@ export type Piece = {
   description: string;
   specs: [string, string][];
   sizes?: string[];
+  /** Photograph of the piece itself, and one of it worn (shown on hover). */
+  image: ImgKey;
+  worn: ImgKey;
 };
 
 export type Collection = {
@@ -109,6 +112,8 @@ export const pieces: Piece[] = [
     collection: "solitaire",
     model: "solitaire",
     metal: "yellow",
+    image: "handRing",
+    worn: "handSolitaire",
     price: 18500,
     tagline: "Six-claw cathedral solitaire",
     description:
@@ -122,6 +127,8 @@ export const pieces: Piece[] = [
     collection: "solitaire",
     model: "halo",
     metal: "white",
+    image: "haloRing",
+    worn: "handsWhite",
     price: 9800,
     tagline: "Halo solitaire",
     description:
@@ -135,6 +142,8 @@ export const pieces: Piece[] = [
     collection: "solitaire",
     model: "trilogy",
     metal: "rose",
+    image: "ringsDish",
+    worn: "handsWhite",
     price: 11200,
     tagline: "Three-stone ring",
     description:
@@ -149,6 +158,8 @@ export const pieces: Piece[] = [
     collection: "eternity",
     model: "eternity",
     metal: "yellow",
+    image: "bandsGold",
+    worn: "handsBands",
     price: 6400,
     tagline: "Full eternity band",
     description:
@@ -162,6 +173,8 @@ export const pieces: Piece[] = [
     collection: "eternity",
     model: "eternity",
     metal: "white",
+    image: "bandsWhite",
+    worn: "handsBands",
     price: 5900,
     tagline: "White gold eternity",
     description:
@@ -175,6 +188,8 @@ export const pieces: Piece[] = [
     collection: "eternity",
     model: "eternity",
     metal: "rose",
+    image: "bandsLinen",
+    worn: "handsWhite",
     price: 5600,
     tagline: "Rose gold eternity",
     description: "Warm rose gold with bright white diamonds. A good match for vintage engagement rings and for stacking.",
@@ -188,6 +203,8 @@ export const pieces: Piece[] = [
     collection: "lumiere",
     model: "pendant",
     metal: "yellow",
+    image: "neckPendant",
+    worn: "shirtNecklace",
     price: 3800,
     tagline: "Oval diamond pendant",
     description:
@@ -200,6 +217,8 @@ export const pieces: Piece[] = [
     collection: "lumiere",
     model: "hoops",
     metal: "white",
+    image: "hoops",
+    worn: "portrait",
     price: 4200,
     tagline: "Pavé hoop earrings",
     description: "Slim hoops pavé-set across the front with brilliant-cut diamonds, light enough to wear every day.",
@@ -211,6 +230,8 @@ export const pieces: Piece[] = [
     collection: "lumiere",
     model: "drops",
     metal: "rose",
+    image: "drops",
+    worn: "earDrop",
     price: 3200,
     tagline: "Diamond drop earrings",
     description: "A round stud with an oval drop hanging below it, set in rose gold. The drop moves freely, so it catches the light whenever you move.",
@@ -223,6 +244,8 @@ export const pieces: Piece[] = [
     collection: "heritage",
     model: "bangle",
     metal: "yellow",
+    image: "bangleSilk",
+    worn: "wristBangle",
     price: 7900,
     tagline: "Diamond-set gold bangle",
     description:
@@ -235,6 +258,8 @@ export const pieces: Piece[] = [
     collection: "heritage",
     model: "bangle",
     metal: "rose",
+    image: "wristBangle",
+    worn: "chainBracelet",
     price: 6800,
     tagline: "Rose gold bangle",
     description: "The Heritage bangle in rose gold. Warm and soft-edged, and it looks better the more it is worn.",
@@ -246,6 +271,8 @@ export const pieces: Piece[] = [
     collection: "heritage",
     model: "hoops",
     metal: "yellow",
+    image: "hoops",
+    worn: "portraitEarring",
     price: 2900,
     tagline: "Gold hoop earrings",
     description: "Classic hoops in yellow gold with a line of pavé across the front. An everyday pair you can wear for years.",

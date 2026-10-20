@@ -3,9 +3,8 @@
 import { useMemo, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import { collections, pieces, piecesIn, formatPrice, METALS, type Collection, type Metal } from "@/lib/data";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
-import { JewelView } from "./three/JewelView";
-import { Photo } from "./Photo";
+import { gsap, useGSAP } from "@/lib/gsap";
+import { Photo, PiecePhoto } from "./Photo";
 import { IMG } from "@/lib/images";
 import { TLink, usePageTransition } from "./Transition";
 import { Reveal, SplitTitle } from "./anim";
@@ -95,10 +94,11 @@ export function CollectionsHero() {
 
 /* ------------------------------------------------------------------ 2. Stacked chapters */
 
-function Chapter({ c, i, live }: { c: Collection; i: number; live: boolean }) {
+function Chapter({ c, i }: { c: Collection; i: number }) {
   const [metal, setMetal] = useState<Metal>(c.metal);
-  const [hover, setHover] = useState(false);
   const list = piecesIn(c.slug);
+  // The arch shows the collection's piece in the chosen metal.
+  const shown = list.find((p) => p.metal === metal) ?? list[0];
 
   return (
     <article id={`col-${c.slug}`} className="cst" style={{ ["--tint" as string]: c.tint, zIndex: i + 1 }}>
@@ -139,11 +139,22 @@ function Chapter({ c, i, live }: { c: Collection; i: number; live: boolean }) {
         </div>
 
         <div className="cst__stage">
-          <div className="cst__arch" onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)} data-cursor="Turn">
+          <TLink href={`/pieces/${shown.slug}`} className="cst__arch" data-cursor="View">
+            {list.map((p) => (
+              <Photo
+                key={p.slug}
+                img={IMG[p.image]}
+                className={`cst__view${p === shown ? " is-on" : ""}`}
+                sizes="(max-width: 1100px) 80vw, 34vw"
+                reveal={false}
+                parallax={0.08}
+              />
+            ))}
             <span className="cst__ring" aria-hidden="true" />
-            {live && <JewelView className="cst__view" kind={c.model} metal={metal} active={hover} glints />}
-            <span className="cst__metal micro">{METALS[metal].label}</span>
-          </div>
+            <span className="cst__metal micro">
+              {shown.name} · {METALS[shown.metal].label}
+            </span>
+          </TLink>
           <Photo img={IMG[c.image]} className="cst__photo" sizes="(max-width: 1100px) 40vw, 14vw" parallax={0.15} />
           <div className="cst__swatches" role="radiogroup" aria-label={`${c.name} metal`}>
             {METAL_KEYS.map((m) => (
@@ -168,19 +179,14 @@ function Chapter({ c, i, live }: { c: Collection; i: number; live: boolean }) {
 
 export function CollectionsStack() {
   const root = useRef<HTMLElement>(null);
-  // While the cards are stacked, only the front card draws its 3D piece: the views share one canvas
-  // that sits above the page, so a covered card's piece would otherwise show through the card on top.
-  const [front, setFront] = useState<number | null>(null);
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add("(min-width: 1101px)", () => {
-        setFront(0);
         const cards = gsap.utils.toArray<HTMLElement>(".cst", root.current);
         cards.forEach((card, i) => {
           const next = cards[i + 1];
           if (!next) return;
-          ScrollTrigger.create({ trigger: next, start: "top 92%", onEnter: () => setFront(i + 1), onLeaveBack: () => setFront(i) });
           gsap.to(card.querySelector(".cst__inner"), {
             scale: 0.9,
             yPercent: -4,
@@ -189,7 +195,6 @@ export function CollectionsStack() {
             scrollTrigger: { trigger: next, start: "top bottom", end: "top top", scrub: true },
           });
         });
-        return () => setFront(null);
       });
     },
     { scope: root }
@@ -198,7 +203,7 @@ export function CollectionsStack() {
   return (
     <section ref={root} className="cstack" aria-label="The four collections">
       {collections.map((c, i) => (
-        <Chapter key={c.slug} c={c} i={i} live={front === null || front === i || front + 1 === i} />
+        <Chapter key={c.slug} c={c} i={i} />
       ))}
     </section>
   );
@@ -209,8 +214,6 @@ export function CollectionsStack() {
 export function CollectionsSalon() {
   const [coll, setColl] = useState("all");
   const [metal, setMetal] = useState<"all" | Metal>("all");
-  const [hover, setHover] = useState<string | null>(null);
-
   const shown = useMemo(
     () => pieces.filter((p) => (coll === "all" || p.collection === coll) && (metal === "all" || p.metal === metal)),
     [coll, metal]
@@ -265,14 +268,12 @@ export function CollectionsSalon() {
             <TLink
               key={p.slug}
               href={`/pieces/${p.slug}`}
-              className="cpiece"
+              className="cpiece has-worn"
               style={{ ["--i" as string]: i, ["--tint" as string]: c.tint }}
               data-cursor="View"
-              onPointerEnter={() => setHover(p.slug)}
-              onPointerLeave={() => setHover(null)}
             >
               <div className="cpiece__media">
-                <JewelView className="cpiece__view" kind={p.model} metal={p.metal} active={hover === p.slug} glints />
+                <PiecePhoto image={IMG[p.image]} worn={IMG[p.worn]} className="cpiece__view" sizes="(max-width: 720px) 90vw, (max-width: 1100px) 45vw, 30vw" />
                 <span className="cpiece__coll micro">{c.name}</span>
                 <span className="cpiece__dot" style={{ background: METALS[p.metal].swatch }} title={METALS[p.metal].label} />
                 <span className="cpiece__go" aria-hidden="true">→</span>

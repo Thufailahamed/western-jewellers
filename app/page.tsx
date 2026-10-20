@@ -1,5 +1,5 @@
 import { articles } from "@/lib/data";
-import { CollectionsRail, CraftSteps, Numbers, Quote } from "@/components/home";
+import { CollectionsRail, Numbers, Quote } from "@/components/home";
 import { AtelierReveal, Diptych, Editorial, Hero, Lookbook } from "@/components/editorial";
 import { Journey } from "@/components/Journey";
 import { PhotoMarquee } from "@/components/gallery";
@@ -17,17 +17,6 @@ export default function Home() {
       <Diptych />
       <Lookbook />
       <CollectionsRail />
-      <CraftSteps
-        eyebrow="The craft"
-        title={["Four hands.", "Forty hours.", "One ring."]}
-        link={{ href: "/bespoke", label: "Commission a piece" }}
-        steps={[
-          { title: "Drawn", image: "drawing", text: "Every commission starts as a pencil sketch at the bench, drawn with you and changed until it is right." },
-          { title: "Cast", image: "casting", text: "Recycled gold and platinum, cast in-house and then hand-forged so the metal is dense and strong." },
-          { title: "Set", image: "setting", text: "Each stone is set under the microscope. Claws are shaped one by one to hold it tightly and let in as much light as possible." },
-          { title: "Finished", image: "polishing", text: "Seven stages of polishing, then a final check under daylight lamps. Then it is boxed and ready for you." },
-        ]}
-      />
       <Numbers />
       <PhotoMarquee />
       <section className="journal-teaser">

@@ -482,194 +482,126 @@ export function Nav() {
 
 /* ------------------------------------------------------------------ Footer */
 
-const PROMISES = ["Made to order in our atelier", "Conflict-free, traceable stones", "Recycled 18k gold & platinum", "Complimentary lifetime care"];
+const FOOTER_LINKS: { label: string; links: [string, string][] }[] = [
+  {
+    label: "Explore",
+    links: [
+      ["/collections", "Collections"],
+      ["/bespoke", "Bespoke"],
+      ["/maison", "Maison"],
+      ["/journal", "Journal"],
+    ],
+  },
+  { label: "Collections", links: collections.map((c) => [`/collections/${c.slug}`, c.name] as [string, string]) },
+  {
+    label: "Visit",
+    links: [
+      ["/appointment", "Book a viewing"],
+      ["/appointment", "Size guide & fitting"],
+      ["/maison", "Lifetime care"],
+    ],
+  },
+];
 
 export function Footer() {
   const root = useRef<HTMLElement>(null);
-  const spot = useRef<SVGRadialGradientElement>(null);
-  const ring = useRef<SVGCircleElement>(null);
   const [status, setStatus] = useState<"idle" | "error" | "sent">("idle");
-  const lenis = useLenis(({ progress }) => {
-    // The back-to-top ring fills as the page is read.
-    ring.current?.style.setProperty("stroke-dashoffset", String(163.4 * (1 - (progress || 0))));
-  });
+  const lenis = useLenis();
 
   useGSAP(
     () => {
-      // The footer content rises out from under the page above.
-      gsap.fromTo(".footer__inner", { yPercent: -18 }, { yPercent: 0, ease: "none", scrollTrigger: { trigger: root.current, start: "top bottom", end: "top 20%", scrub: true } });
-      gsap.fromTo(
-        ".footer__mark text",
-        { y: 120, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1.8, ease: "expo.out", scrollTrigger: { trigger: ".footer__mark", start: "top 95%" } }
-      );
-      gsap.fromTo(
-        ".footer__reveal",
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1.2, ease: "expo.out", stagger: 0.06, scrollTrigger: { trigger: root.current, start: "top 75%" } }
-      );
+      gsap.fromTo(".footer__reveal", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1.2, ease: "expo.out", stagger: 0.06, scrollTrigger: { trigger: root.current, start: "top 80%" } });
+      gsap.fromTo(".footer__mark", { yPercent: 30, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.8, ease: "expo.out", scrollTrigger: { trigger: ".footer__mark", start: "top 98%" } });
     },
     { scope: root }
   );
 
-  // A soft gold light follows the pointer across the wordmark.
-  const onMove = (e: React.PointerEvent<SVGSVGElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    const g = spot.current;
-    if (!g) return;
-    gsap.to(g, { attr: { cx: (e.clientX - r.left) / r.width, cy: (e.clientY - r.top) / r.height }, duration: 0.8, ease: "power3.out" });
-  };
-
   return (
     <footer ref={root} className="footer">
       <div className="footer__inner">
-        <div className="footer__letter">
-          <div className="footer__reveal">
+        <div className="footer__top">
+          <div className="footer__letter footer__reveal">
             <span className="micro footer__label">The Western Letter</span>
             <p className="footer__lede">
               Stories from the bench, <em>a few times a year.</em>
             </p>
-          </div>
-          <form
-            className={`footer__news footer__reveal${status === "error" ? " is-error" : ""}`}
-            onSubmit={(e) => {
-              e.preventDefault();
-              const input = e.currentTarget.elements.namedItem("email") as HTMLInputElement;
-              if (!input.value || !input.checkValidity()) {
-                setStatus("error");
-                return input.focus();
-              }
-              setStatus("sent");
-              input.value = "";
-            }}
-            noValidate
-          >
-            <div className="footer__field">
-              <input name="email" type="email" placeholder="Your email address" aria-label="Email address" onInput={() => status !== "idle" && setStatus("idle")} />
-              <button type="submit" className="footer__submit" aria-label="Subscribe">
-                <span>Subscribe</span>
-                <i>→</i>
-              </button>
-            </div>
-            <span className="micro footer__note" aria-live="polite">
-              {status === "sent"
-                ? "Thank you — you're on the list."
-                : status === "error"
-                  ? "Please enter a valid email address."
-                  : "New collections and atelier news. Unsubscribe at any time."}
-            </span>
-          </form>
-        </div>
-
-        <div className="footer__grid">
-          <nav className="footer__col footer__reveal" aria-label="Footer">
-            <span className="micro footer__label">Explore</span>
-            {[
-              ["/collections", "Collections"],
-              ["/bespoke", "Bespoke"],
-              ["/maison", "Maison"],
-              ["/journal", "Journal"],
-              ["/appointment", "Book a viewing"],
-            ].map(([href, label]) => (
-              <TLink key={href} href={href} className="footer__link">
-                <span>{label}</span>
-                <i>→</i>
-              </TLink>
-            ))}
-          </nav>
-          <div className="footer__col footer__reveal">
-            <span className="micro footer__label">Collections</span>
-            {collections.map((c) => (
-              <TLink key={c.slug} href={`/collections/${c.slug}`} className="footer__link">
-                <span>
-                  {c.name}
-                  <sup>{String(piecesIn(c.slug).length).padStart(2, "0")}</sup>
-                </span>
-                <i>→</i>
-              </TLink>
-            ))}
-          </div>
-          <div className="footer__col footer__reveal">
-            <span className="micro footer__label">The atelier</span>
-            <p className="footer__text">
-              Tuesday – Saturday
-              <br />
-              10:00 – 18:00
-            </p>
-            <p className="footer__text footer__text--muted">
-              Private viewings by appointment.
-              <br />
-              Evenings on request.
-            </p>
-            <TLink href="/appointment" className="footer__pill">
-              <span>Book a viewing</span>
-            </TLink>
-          </div>
-          <div className="footer__col footer__col--end footer__reveal">
-            <span className="micro footer__label">Follow</span>
-            <div className="footer__social">
-              <a href="#" aria-disabled="true" aria-label="Instagram" className="footer__icon">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
-                  <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.2" cy="6.8" r="0.9" className="dot" />
-                </svg>
-              </a>
-              <a href="#" aria-disabled="true" aria-label="Pinterest" className="footer__icon">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <circle cx="12" cy="12" r="8.5" />
-                  <path d="M11.2 8.6c2.6-.6 4.4.9 4 3.2-.3 1.8-1.6 2.8-2.9 2.5-.9-.2-1.2-1-1.2-1l-1.3 4.6" />
-                </svg>
-              </a>
-            </div>
-            <button
-              className="footer__top"
-              onClick={() => (lenis ? lenis.scrollTo(0, { duration: 2.2 }) : window.scrollTo({ top: 0, behavior: "smooth" }))}
-              aria-label="Back to top"
+            <form
+              className={`footer__news${status === "error" ? " is-error" : ""}`}
+              onSubmit={(e) => {
+                e.preventDefault();
+                const input = e.currentTarget.elements.namedItem("email") as HTMLInputElement;
+                if (!input.value || !input.checkValidity()) {
+                  setStatus("error");
+                  return input.focus();
+                }
+                setStatus("sent");
+                input.value = "";
+              }}
+              noValidate
             >
-              <svg viewBox="0 0 60 60" aria-hidden="true">
-                <circle cx="30" cy="30" r="26" className="track" />
-                <circle ref={ring} cx="30" cy="30" r="26" className="bar" />
-              </svg>
-              <i>↑</i>
-              <span className="micro">Back to top</span>
-            </button>
+              <div className="footer__field">
+                <input name="email" type="email" placeholder="Email address" aria-label="Email address" onInput={() => status !== "idle" && setStatus("idle")} />
+                <button type="submit" className="footer__submit micro">
+                  Subscribe <span aria-hidden="true">→</span>
+                </button>
+              </div>
+              <span className="footer__note" aria-live="polite">
+                {status === "sent" ? "Thank you — you're on the list." : status === "error" ? "Please enter a valid email address." : "New collections and atelier news. Unsubscribe at any time."}
+              </span>
+            </form>
           </div>
+
+          <nav className="footer__nav" aria-label="Footer">
+            {FOOTER_LINKS.map((col) => (
+              <div key={col.label} className="footer__col footer__reveal">
+                <span className="micro footer__label">{col.label}</span>
+                <ul>
+                  {col.links.map(([href, label]) => (
+                    <li key={label}>
+                      <TLink href={href} className="footer__link">
+                        {label}
+                      </TLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <div className="footer__col footer__reveal">
+              <span className="micro footer__label">The atelier</span>
+              <p className="footer__text">
+                Tuesday – Saturday
+                <br />
+                10:00 – 18:00
+                <br />
+                <span>By appointment</span>
+              </p>
+            </div>
+          </nav>
         </div>
 
-        <ul className="footer__promises footer__reveal">
-          {PROMISES.map((p) => (
-            <li key={p} className="micro">
-              <svg viewBox="0 0 10 10" aria-hidden="true">
-                <path d="M5 0 L9 5 L5 10 L1 5 Z" />
-              </svg>
-              {p}
-            </li>
-          ))}
-        </ul>
-
-        <svg className="footer__mark" viewBox="0 0 1000 170" onPointerMove={onMove} role="img" aria-label="Western Jewellers">
+        <svg className="footer__mark" viewBox="0 0 1000 150" role="img" aria-label="Western Jewellers">
           <defs>
             <linearGradient id="wm-base" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#eadcc4" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#eadcc4" stopOpacity="0.06" />
+              <stop offset="0%" stopColor="#eadcc4" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#eadcc4" stopOpacity="0.04" />
             </linearGradient>
-            <radialGradient ref={spot} id="wm-spot" cx="0.5" cy="0.5" r="0.32">
-              <stop offset="0%" stopColor="#f3dfb2" stopOpacity="1" />
-              <stop offset="45%" stopColor="#c9a66b" stopOpacity="0.75" />
-              <stop offset="100%" stopColor="#c9a66b" stopOpacity="0" />
-            </radialGradient>
           </defs>
-          <text x="0" y="150" textLength="1000" lengthAdjust="spacingAndGlyphs" fill="url(#wm-base)">WESTERN</text>
-          <text x="0" y="150" textLength="1000" lengthAdjust="spacingAndGlyphs" fill="url(#wm-spot)">WESTERN</text>
+          <text x="500" y="140" textAnchor="middle" textLength="1000" lengthAdjust="spacing" fill="url(#wm-base)">WESTERN</text>
         </svg>
 
         <div className="footer__bottom">
           <span className="micro">© {new Date().getFullYear()} Western Jewellers</span>
-          <span className="micro footer__sub">
-            <i /> Maison de haute joaillerie <i />
-          </span>
-          <span className="micro">Ethically sourced · Made by hand</span>
+          <div className="footer__social micro">
+            <a href="#" aria-disabled="true">Instagram</a>
+            <a href="#" aria-disabled="true">Pinterest</a>
+          </div>
+          <button
+            type="button"
+            className="footer__totop micro"
+            onClick={() => (lenis ? lenis.scrollTo(0, { duration: 2.2 }) : window.scrollTo({ top: 0, behavior: "smooth" }))}
+          >
+            Back to top <span aria-hidden="true">↑</span>
+          </button>
         </div>
       </div>
     </footer>

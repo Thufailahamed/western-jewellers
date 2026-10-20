@@ -131,7 +131,7 @@ export function Hero() {
     <section ref={root} className="hero">
       <div ref={arch} className="hero__arch" aria-hidden="true">
         <div className="hero__arch-bg">
-          <span className="hero__arch-ghost">{String(active + 1).padStart(2, "0")}</span>
+          <span key={active} className="hero__arch-ghost">{String(active + 1).padStart(2, "0")}</span>
         </div>
         <svg className="hero__badge" viewBox="0 0 120 120">
           <defs>
@@ -449,28 +449,30 @@ export function Lookbook() {
 
   useGSAP(
     () => {
-      gsap.fromTo(".lookbook__title .ln > span", { yPercent: 110, y: 0 }, { yPercent: 0, duration: 1.5, ease: "expo.out", stagger: 0.08, scrollTrigger: { trigger: root.current, start: "top 75%" } });
-      gsap.fromTo(".look-row", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1.1, ease: "expo.out", stagger: 0.06, scrollTrigger: { trigger: ".lookbook__index", start: "top 85%" } });
-      gsap.fromTo(".lookbook__stage", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.6, ease: "expo.inOut", scrollTrigger: { trigger: ".lookbook__stage", start: "top 85%" } });
+      const st = { trigger: root.current, start: "top 72%" };
+      gsap.fromTo(".lookbook__title .ln > span", { yPercent: 110, y: 0 }, { yPercent: 0, duration: 1.5, ease: "expo.out", scrollTrigger: st });
+      gsap.fromTo(".lookbook__head .fade", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 1.2, ease: "expo.out", stagger: 0.08, delay: 0.2, scrollTrigger: st });
+      gsap.fromTo(".lookbook__index li", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1.1, ease: "expo.out", stagger: 0.05, scrollTrigger: { trigger: ".lookbook__index", start: "top 85%" } });
+      gsap.fromTo(".lookbook__frame", { clipPath: "inset(12% 12% 12% 12%)", opacity: 0 }, { clipPath: "inset(0% 0% 0% 0%)", opacity: 1, duration: 1.8, ease: "expo.out", scrollTrigger: { trigger: ".lookbook__stage", start: "top 85%" } });
     },
     { scope: root }
   );
   useGSAP(
     () => {
-      gsap.fromTo(".lookbook__cap .cap", { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1, ease: "expo.out", stagger: 0.05, delay: 0.3 });
+      gsap.fromTo(".lookbook__cap .cap", { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.9, ease: "expo.out", stagger: 0.04, delay: 0.25 });
     },
     { scope: root, dependencies: [active] }
   );
 
   return (
     <section ref={root} className="lookbook">
-      <div className="lookbook__head">
-        <span className="micro">Lookbook — Autumn / Winter</span>
+      <header className="lookbook__head">
+        <span className="micro micro--gold fade">The lookbook</span>
         <h2 className="lookbook__title" aria-label="Worn, not kept.">
           <span className="ln"><span>Worn, <em>not kept.</em></span></span>
         </h2>
-        <p className="micro lookbook__note">Fine jewellery is made to be lived in. Every piece shown here is made to order in our atelier.</p>
-      </div>
+        <p className="lookbook__note fade">Fine jewellery is made to be lived in. Every piece here is made to order in our atelier.</p>
+      </header>
 
       <div className="lookbook__body">
         <ol className="lookbook__index" onPointerEnter={() => setHold(true)} onPointerLeave={() => setHold(false)}>
@@ -484,36 +486,28 @@ export function Lookbook() {
               >
                 <span className="look-row__n">{String(i + 1).padStart(2, "0")}</span>
                 <span className="look-row__name">{l.piece.name}</span>
-                <span className="look-row__kind micro">{KIND_LABEL[l.piece.model]}</span>
                 <span className="look-row__price">{formatPrice(l.piece.price)}</span>
-                <span className="look-row__go" aria-hidden="true">→</span>
                 {i === active && <i key={`${active}-${hold}-${inView}`} className={`look-row__bar${!hold && inView ? " is-running" : ""}`} style={{ animationDuration: `${LOOK_TIME}s` }} />}
               </TLink>
             </li>
           ))}
         </ol>
 
-        <TLink href={`/pieces/${look.piece.slug}`} className="lookbook__stage" data-cursor="View">
-          {looks.map((l, i) => (
-            <div key={l.slug} className={`lookbook__img${i === active ? " is-active" : ""}${i === prev ? " is-prev" : ""}`}>
-              <Photo img={IMG[l.img]} sizes="(max-width: 720px) 100vw, 46vw" reveal={false} parallax={0} />
-            </div>
-          ))}
-          <span className="lookbook__ghost" aria-hidden="true">{String(active + 1).padStart(2, "0")}</span>
+        <div className="lookbook__stage">
+          <TLink href={`/pieces/${look.piece.slug}`} className="lookbook__frame" data-cursor="View" aria-label={`View ${look.piece.name}`}>
+            {looks.map((l, i) => (
+              <div key={l.slug} className={`lookbook__img${i === active ? " is-active" : ""}${i === prev ? " is-prev" : ""}`}>
+                <Photo img={IMG[l.img]} sizes="(max-width: 720px) 100vw, 40vw" reveal={false} parallax={0} />
+              </div>
+            ))}
+          </TLink>
           <div className="lookbook__cap">
             <div className="cap-mask"><span className="cap micro">{KIND_LABEL[look.piece.model]} · {METALS[look.piece.metal].label}</span></div>
-            <div className="cap-mask"><span className="cap lookbook__cap-name">{look.piece.name}</span></div>
             <div className="cap-mask">
-              <span className="cap lookbook__cap-buy">
-                {formatPrice(look.piece.price)}
-                <span className="link-arrow">View piece <span>→</span></span>
-              </span>
+              <TLink href={`/pieces/${look.piece.slug}`} className="cap link-arrow">View piece <span>→</span></TLink>
             </div>
           </div>
-          <span className="lookbook__count micro">
-            {String(active + 1).padStart(2, "0")} / {String(looks.length).padStart(2, "0")}
-          </span>
-        </TLink>
+        </div>
       </div>
     </section>
   );

@@ -3,8 +3,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { collections, formatPrice, METALS, type Article, type Piece } from "@/lib/data";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { JewelView } from "./three/JewelView";
-import { Photo } from "./Photo";
+import { Photo, PiecePhoto } from "./Photo";
 import { IMG, type ImgKey } from "@/lib/images";
 import { TLink } from "./Transition";
 import { Magnetic } from "./Chrome";
@@ -67,18 +66,11 @@ export function Crumbs({ items }: { items: { href: string; label: string }[] }) 
 /* ------------------------------------------------------------------ Piece card */
 
 export function PieceCard({ piece }: { piece: Piece }) {
-  const [hover, setHover] = useState(false);
   const tint = collections.find((c) => c.slug === piece.collection)?.tint ?? "#ece2d2";
   return (
-    <TLink
-      href={`/pieces/${piece.slug}`}
-      className="pcard"
-      data-cursor="View"
-      onPointerEnter={() => setHover(true)}
-      onPointerLeave={() => setHover(false)}
-    >
+    <TLink href={`/pieces/${piece.slug}`} className="pcard has-worn" data-cursor="View">
       <div className="pcard__media" style={{ ["--tint" as string]: tint }}>
-        <JewelView className="pcard__view" kind={piece.model} metal={piece.metal} active={hover} />
+        <PiecePhoto image={IMG[piece.image]} worn={IMG[piece.worn]} className="pcard__view" sizes="(max-width: 720px) 90vw, 30vw" />
         <span className="pcard__metal">{METALS[piece.metal].label}</span>
       </div>
       <div className="pcard__body">
@@ -115,8 +107,8 @@ export function ArticleCard({ article, large = false }: { article: Article; larg
 
 /* ------------------------------------------------------------------ Accordion */
 
-export function Accordion({ items }: { items: { title: string; body: ReactNode }[] }) {
-  const [open, setOpen] = useState<number | null>(0);
+export function Accordion({ items, defaultOpen = 0 }: { items: { title: string; body: ReactNode }[]; defaultOpen?: number | null }) {
+  const [open, setOpen] = useState<number | null>(defaultOpen);
   return (
     <div className="accordion">
       {items.map((it, i) => (
@@ -152,9 +144,9 @@ function AccordionItem({ title, open, onToggle, children }: { title: string; ope
 /* ------------------------------------------------------------------ CTA band */
 
 const EXPECT = [
-  ["A private hour", "with one of the makers, in a room of your own."],
-  ["A tray of stones", "to hold and compare in natural daylight."],
-  ["A sketch to keep", "drawn with you at the bench, yours to take home."],
+  ["A private hour", "With a maker, in a room of your own."],
+  ["A tray of stones", "To hold and compare in daylight."],
+  ["A sketch to keep", "Drawn with you at the bench."],
 ];
 
 export function CtaBand({
@@ -171,45 +163,28 @@ export function CtaBand({
   const root = useRef<HTMLElement>(null);
   useGSAP(
     () => {
-      gsap.fromTo(".cta__badge", { rotate: -40, opacity: 0, scale: 0.7 }, { rotate: 0, opacity: 1, scale: 1, duration: 1.6, ease: "expo.out", scrollTrigger: { trigger: root.current, start: "top 70%" } });
-      gsap.fromTo(
-        ".cta__expect li",
-        { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 1.1, ease: "expo.out", stagger: 0.08, scrollTrigger: { trigger: ".cta__expect", start: "top 85%" } }
-      );
+      gsap.fromTo(".cta__photo", { clipPath: "inset(14% 14% 0% 14% round 999px 999px 0 0)" }, { clipPath: "inset(0% 0% 0% 0% round 999px 999px 0 0)", duration: 1.8, ease: "expo.out", scrollTrigger: { trigger: root.current, start: "top 75%" } });
+      gsap.fromTo(".cta__expect li", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1.1, ease: "expo.out", stagger: 0.08, scrollTrigger: { trigger: ".cta__expect", start: "top 88%" } });
     },
     { scope: root }
   );
   return (
     <section ref={root} className="cta">
       <div className="cta__media">
-        <Photo img={IMG.benchExamine} className="cta__photo" sizes="(max-width: 1100px) 90vw, 38vw" parallax={0.1} />
-        <Photo img={IMG.haloRing} className="cta__photo-sm" sizes="(max-width: 720px) 40vw, 16vw" parallax={0.22} />
-        <svg className="cta__badge" viewBox="0 0 120 120" aria-hidden="true">
-          <defs>
-            <path id="cta-circle" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0" />
-          </defs>
-          <circle cx="60" cy="60" r="59" />
-          <text>
-            <textPath href="#cta-circle" textLength="286" lengthAdjust="spacing">Private viewings · By appointment only ·</textPath>
-          </text>
-          <path d="M60 50 L66 60 L60 70 L54 60 Z" />
-        </svg>
+        <Photo img={IMG.benchExamine} className="cta__photo" sizes="(max-width: 720px) 90vw, 40vw" reveal={false} parallax={0.08} />
       </div>
 
       <div className="cta__inner">
-        <Reveal className="cta__eyebrow">
-          <span className="micro micro--gold">Private appointments</span>
-          <span className="micro">Tuesday – Saturday · 10:00 – 18:00</span>
+        <Reveal as="span" className="micro micro--gold">
+          Private appointments
         </Reveal>
         <SplitTitle className="cta__title" lines={[title[0], <em key="e">{title[1]}</em>]} />
         <Reveal as="p" className="cta__text">
-          {text ?? "Sit with one of our makers, hold the stones yourself and leave with a sketch. Appointments are private and there is no obligation to buy."}
+          {text ?? "Sit with one of our makers, hold the stones yourself and leave with a sketch. There is no obligation to buy."}
         </Reveal>
         <ol className="cta__expect">
-          {EXPECT.map(([t, d], i) => (
+          {EXPECT.map(([t, d]) => (
             <li key={t}>
-              <span className="cta__n">{String(i + 1).padStart(2, "0")}</span>
               <span className="cta__t">{t}</span>
               <span className="cta__d">{d}</span>
             </li>
@@ -224,6 +199,9 @@ export function CtaBand({
           <TLink href={href === "/bespoke" ? "/appointment" : "/bespoke"} className="link-arrow">
             {href === "/bespoke" ? "Or book a viewing" : "Or begin a commission"} <span>→</span>
           </TLink>
+        </Reveal>
+        <Reveal as="span" className="micro cta__hours">
+          Tuesday – Saturday · 10:00 – 18:00
         </Reveal>
       </div>
     </section>

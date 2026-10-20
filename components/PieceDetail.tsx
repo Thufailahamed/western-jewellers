@@ -1,142 +1,116 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useLenis } from "lenis/react";
 import { formatPrice, METALS, type Collection, type Metal, type Piece } from "@/lib/data";
-import { IMG } from "@/lib/images";
+import { IMG, type ImgKey } from "@/lib/images";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { JewelView } from "./three/JewelView";
 import { TLink, usePageTransition } from "./Transition";
-import { Magnetic } from "./Chrome";
 import { Accordion, Crumbs } from "./shared";
 import { Photo } from "./Photo";
 import { STYLED } from "./gallery";
 
-const CAPTIONS = ["As worn", "At the bench", "The finish"];
-const PROMISES = ["Made to order in our atelier", "Conflict-free, traceable stones", "Complimentary lifetime care"];
+const METAL_KEYS = Object.keys(METALS) as Metal[];
+const SERVICES = [
+  ["Insured delivery", "Complimentary"],
+  ["Lifetime care", "Included"],
+  ["Grading report", "With every stone"],
+];
 
 export function PieceDetail({ piece, collection }: { piece: Piece; collection: Collection }) {
   const [metal, setMetal] = useState<Metal>(piece.metal);
   const [size, setSize] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(false);
   const [frame, setFrame] = useState(0);
   const [bar, setBar] = useState(false);
-  const drag = useRef({ x: 0, y: 0 });
-  const down = useRef<{ x: number; y: number } | null>(null);
   const root = useRef<HTMLElement>(null);
   const actions = useRef<HTMLDivElement>(null);
   const { ready } = usePageTransition();
-  const lenis = useLenis();
-  const photos = STYLED[collection.slug] ?? STYLED.solitaire;
+
+  // The piece, the piece worn, then the collection's bench and still-life shots.
+  const [, made, still] = STYLED[collection.slug] ?? STYLED.solitaire;
+  const shots: { img: ImgKey; cap: string }[] = [
+    { img: piece.image, cap: piece.name },
+    { img: piece.worn, cap: "As worn" },
+    { img: made, cap: "At the bench" },
+    { img: still, cap: "The finish" },
+  ].filter((s, i, all) => all.findIndex((o) => o.img === s.img) === i);
 
   useGSAP(
     () => {
       if (!ready) return;
-      gsap.fromTo(".pd__stage", { clipPath: "inset(10% 10% 10% 10% round 24px)" }, { clipPath: "inset(0% 0% 0% 0% round 0px)", duration: 1.6, ease: "expo.inOut" });
-      gsap.fromTo(".pd__ghost", { yPercent: 30, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 2, ease: "expo.out", delay: 0.4 });
-      gsap.fromTo(".pd__title .ln > span", { yPercent: 110, y: 0 }, { yPercent: 0, duration: 1.4, ease: "expo.out", delay: 0.3 });
-      gsap.fromTo(".pd__info > *:not(.pd__title)", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 1.2, ease: "expo.out", stagger: 0.05, delay: 0.45 });
-      gsap.fromTo(".pd__rail > *", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 1, ease: "expo.out", stagger: 0.06, delay: 0.7 });
+      gsap.fromTo(".pd__shot:first-child", { clipPath: "inset(8% 8% 8% 8%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.6, ease: "expo.out" });
+      gsap.fromTo(".pd__shot:first-child img", { scale: 1.15 }, { scale: 1, duration: 2.2, ease: "expo.out" });
+      gsap.fromTo(".pd__title .ln > span", { yPercent: 110, y: 0 }, { yPercent: 0, duration: 1.4, ease: "expo.out", delay: 0.25 });
+      gsap.fromTo(".pd__info > *:not(.pd__title)", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 1.1, ease: "expo.out", stagger: 0.05, delay: 0.4 });
     },
     { scope: root, dependencies: [ready] }
   );
 
-  // Keep the thumbnail rail in step with the frame in view.
+  // Counter for the swipeable gallery on small screens.
   useEffect(() => {
-    const frames = root.current?.querySelectorAll<HTMLElement>(".pd__frame");
-    if (!frames) return;
+    const items = root.current?.querySelectorAll<HTMLElement>(".pd__shot");
+    if (!items) return;
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && setFrame(Number((e.target as HTMLElement).dataset.i))),
-      { rootMargin: "-45% 0px -45% 0px" }
+      { threshold: 0.6 }
     );
-    frames.forEach((f) => io.observe(f));
+    items.forEach((f) => io.observe(f));
     return () => io.disconnect();
   }, []);
 
-  // The slim buy bar appears once the main buttons have scrolled away.
+  // When the info column is taller than the screen, pin it by its bottom edge instead so all of it stays reachable.
+  useEffect(() => {
+    const el = root.current?.querySelector<HTMLElement>(".pd__info");
+    if (!el) return;
+    const fit = () => {
+      el.style.top = "";
+      if (getComputedStyle(el).position !== "sticky") return;
+      const top = parseFloat(getComputedStyle(el).top) || 0;
+      const over = el.offsetHeight + top + 24 - window.innerHeight;
+      if (over > 0) el.style.top = `${top - over}px`;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    window.addEventListener("resize", fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", fit);
+    };
+  }, []);
+
+  // The slim buy bar appears once the main button has scrolled away.
   useEffect(() => {
     const el = actions.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setBar(!e.isIntersecting && e.boundingClientRect.top < 0));
+    // ...and steps aside again once the footer comes into view.
+    let past = false, footer = false;
+    const io = new IntersectionObserver((entries) =>
+      entries.forEach((e) => {
+        if (e.target === el) past = !e.isIntersecting && e.boundingClientRect.top < 0;
+        else footer = e.isIntersecting;
+        setBar(past && !footer);
+      })
+    );
     io.observe(el);
+    const foot = document.querySelector(".footer");
+    if (foot) io.observe(foot);
     return () => io.disconnect();
   }, []);
-
-  const goTo = (i: number) => {
-    const el = root.current?.querySelector<HTMLElement>(`.pd__frame[data-i="${i}"]`);
-    if (!el) return;
-    // On narrow screens the gallery is a horizontal strip.
-    const strip = el.parentElement!;
-    if (strip.scrollWidth > strip.clientWidth + 4) strip.scrollTo({ left: el.offsetLeft - strip.offsetLeft, behavior: "smooth" });
-    else if (lenis) lenis.scrollTo(el, { offset: -90, duration: 1.4 });
-    else el.scrollIntoView({ behavior: "smooth" });
-  };
 
   const sizeLabel = piece.sizes ? (size ? `Size ${size}` : "Select a size") : null;
 
   return (
-    <section ref={root} className={`pd pd--${metal}`}>
-      <nav className="pd__rail" aria-label="Views">
-        <button className={`pd__thumb pd__thumb--3d${frame === 0 ? " is-active" : ""}`} onClick={() => goTo(0)} aria-label="3D view">
-          <span>3D</span>
-        </button>
-        {photos.map((p, i) => (
-          <button key={p} className={`pd__thumb${frame === i + 1 ? " is-active" : ""}`} onClick={() => goTo(i + 1)} aria-label={CAPTIONS[i]}>
-            <Photo img={IMG[p]} sizes="80px" reveal={false} parallax={0} />
-          </button>
-        ))}
-        <span className="pd__rail-count micro">
-          {String(frame + 1).padStart(2, "0")}
-          <i />
-          {String(photos.length + 1).padStart(2, "0")}
-        </span>
-      </nav>
-
+    <section ref={root} className="pd">
       <div className="pd__gallery">
-        <div
-          className={`pd__frame pd__stage${zoom ? " is-zoom" : ""}`}
-          data-i="0"
-          data-cursor="Drag"
-          onPointerDown={(e) => {
-            down.current = { x: e.clientX, y: e.clientY };
-            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-          }}
-          onPointerMove={(e) => {
-            if (!down.current) return;
-            drag.current.x += (e.clientX - down.current.x) * 0.01;
-            drag.current.y = Math.max(-0.9, Math.min(0.9, drag.current.y + (e.clientY - down.current.y) * 0.006));
-            down.current = { x: e.clientX, y: e.clientY };
-          }}
-          onPointerUp={() => (down.current = null)}
-          onPointerCancel={() => (down.current = null)}
-        >
-          {(Object.keys(METALS) as Metal[]).map((m) => (
-            <span key={m} className={`pd__tint pd__tint--${m}${metal === m ? " is-on" : ""}`} aria-hidden="true" />
-          ))}
-          <span className="pd__ghost" aria-hidden="true">{piece.name}</span>
-          <JewelView className="pd__view" kind={piece.model} metal={metal} glints drag={drag} zoom={zoom ? 1.45 : 1} />
-          <div className="pd__hint">
-            <span className="micro pd__hint-l">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3" />
-                <path d="M18 3v4h-4M6 21v-4h4" />
-              </svg>
-              Drag to rotate · 360°
-            </span>
-            <button className="pd__zoom" onClick={() => setZoom((z) => !z)} onPointerDown={(e) => e.stopPropagation()} aria-pressed={zoom} aria-label={zoom ? "Zoom out" : "Zoom in"}>
-              {zoom ? "−" : "+"}
-            </button>
-          </div>
-        </div>
-        {photos.map((p, i) => (
-          <figure key={p} className="pd__frame pd__photo" data-i={i + 1}>
-            <Photo img={IMG[p]} sizes="(max-width: 1100px) 90vw, 50vw" parallax={0.1} />
-            <figcaption>
-              <span className="micro">{String(i + 2).padStart(2, "0")}</span>
-              <span>{CAPTIONS[i]}</span>
-            </figcaption>
+        {shots.map((s, i) => (
+          <figure key={s.img} className="pd__shot" data-i={i}>
+            <Photo img={IMG[s.img]} sizes={i === 0 || i === 3 ? "(max-width: 1100px) 90vw, 58vw" : "(max-width: 1100px) 90vw, 29vw"} reveal={i > 0} parallax={0} priority={i === 0} />
+            {i > 0 && <figcaption className="micro">{s.cap}</figcaption>}
           </figure>
         ))}
+        <span className="pd__count micro" aria-hidden="true">
+          {frame + 1} / {shots.length}
+        </span>
       </div>
 
       <div className="pd__info">
@@ -147,20 +121,15 @@ export function PieceDetail({ piece, collection }: { piece: Piece; collection: C
             { href: `/pieces/${piece.slug}`, label: piece.name },
           ]}
         />
-        <div className="pd__kicker">
-          <span className="micro micro--gold">{piece.tagline}</span>
-          <span className="micro">{collection.index} — {collection.name}</span>
-        </div>
         <h1 className="pd__title">
           <span className="ln">
             <span>{piece.name}</span>
           </span>
         </h1>
+        <p className="pd__tagline">{piece.tagline}</p>
         <div className="pd__buy">
           <span className="pd__price">{formatPrice(piece.price)}</span>
-          <span className="micro pd__lead">
-            <i /> Made to order · 3–5 weeks
-          </span>
+          <span className="micro pd__lead">Made to order · 3–5 weeks</span>
         </div>
 
         <div className="pd__option">
@@ -169,8 +138,8 @@ export function PieceDetail({ piece, collection }: { piece: Piece; collection: C
             <span className="pd__option-val">{METALS[metal].label}</span>
           </div>
           <div className="pd__metals" role="radiogroup" aria-label="Metal">
-            {(Object.keys(METALS) as Metal[]).map((m) => (
-              <button key={m} role="radio" aria-checked={metal === m} className={`pd__metal${metal === m ? " is-active" : ""}`} onClick={() => setMetal(m)}>
+            {METAL_KEYS.map((m) => (
+              <button key={m} type="button" role="radio" aria-checked={metal === m} className={`pd__metal${metal === m ? " is-active" : ""}`} onClick={() => setMetal(m)}>
                 <i style={{ background: METALS[m].swatch }} />
                 <span>{METALS[m].label.replace("18k ", "")}</span>
               </button>
@@ -182,11 +151,11 @@ export function PieceDetail({ piece, collection }: { piece: Piece; collection: C
           <div className="pd__option">
             <div className="pd__option-head">
               <span className="micro">Ring size</span>
-              <TLink href="/appointment" className="pd__guide micro">Size guide &amp; fitting →</TLink>
+              <TLink href="/appointment" className="pd__guide micro">Size guide</TLink>
             </div>
             <div className="sizes" role="radiogroup" aria-label="Ring size">
               {piece.sizes.map((s) => (
-                <button key={s} role="radio" aria-checked={size === s} className={size === s ? "is-active" : ""} onClick={() => setSize(s)}>
+                <button key={s} type="button" role="radio" aria-checked={size === s} className={size === s ? "is-active" : ""} onClick={() => setSize(s)}>
                   {s}
                 </button>
               ))}
@@ -195,23 +164,19 @@ export function PieceDetail({ piece, collection }: { piece: Piece; collection: C
         )}
 
         <div ref={actions} className="pd__actions">
-          <Magnetic strength={0.15}>
-            <TLink href="/appointment" className="btn btn--dark btn--full">
-              <span>Book a private viewing</span>
-            </TLink>
-          </Magnetic>
+          <TLink href="/appointment" className="btn btn--dark btn--full">
+            <span>Book a private viewing</span>
+          </TLink>
           <TLink href="/bespoke" className="btn btn--outline btn--full">
             <span>Make it bespoke</span>
           </TLink>
         </div>
 
-        <ul className="pd__promises">
-          {PROMISES.map((p) => (
-            <li key={p} className="micro">
-              <svg viewBox="0 0 10 10" aria-hidden="true">
-                <path d="M5 0 L9 5 L5 10 L1 5 Z" />
-              </svg>
-              {p}
+        <ul className="pd__services">
+          {SERVICES.map(([t, d]) => (
+            <li key={t}>
+              <span className="pd__services-t">{t}</span>
+              <span className="pd__services-d">{d}</span>
             </li>
           ))}
         </ul>
@@ -219,6 +184,7 @@ export function PieceDetail({ piece, collection }: { piece: Piece; collection: C
         <p className="pd__desc">{piece.description}</p>
 
         <Accordion
+          defaultOpen={null}
           items={[
             {
               title: "Specifications",
@@ -245,7 +211,6 @@ export function PieceDetail({ piece, collection }: { piece: Piece; collection: C
       </div>
 
       <div className={`pd__bar${bar ? " is-on" : ""}`} aria-hidden={!bar}>
-        <span className="pd__bar-swatch" style={{ background: METALS[metal].swatch }} />
         <span className="pd__bar-name">{piece.name}</span>
         <span className="micro pd__bar-meta">
           {METALS[metal].label}

@@ -54,3 +54,13 @@ export function Photo({ img, className, sizes = "100vw", parallax = 0.08, reveal
     </div>
   );
 }
+
+/** A piece's own photograph, with the same piece as worn fading in on hover of the nearest `.has-worn` ancestor. */
+export function PiecePhoto({ image, worn, className, sizes }: { image: Img; worn: Img; className?: string; sizes?: string }) {
+  return (
+    <div className={`piece-photo${className ? " " + className : ""}`}>
+      <Photo img={image} className="piece-photo__still" sizes={sizes} reveal={false} parallax={0.06} />
+      <Photo img={worn} className="piece-photo__worn" sizes={sizes} reveal={false} parallax={0.06} />
+    </div>
+  );
+}
