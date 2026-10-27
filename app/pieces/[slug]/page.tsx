@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCollection, getPiece, pieces } from "@/lib/data";
 import { PieceDetail } from "@/components/PieceDetail";
-import { CtaBand, PieceCard } from "@/components/shared";
-import { Reveal, SplitTitle } from "@/components/anim";
+import { Authored, Documentation, Faq, Recommended, Reviews, Standards, Ticker, TICKER } from "@/components/product";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -27,19 +26,16 @@ export default async function PiecePage({ params }: Props) {
   ].slice(0, 3);
 
   return (
-    <>
+    <div className="product">
       <PieceDetail piece={piece} collection={collection} />
-      <section className="grid-section related">
-        <div className="section-head">
-          <SplitTitle className="h2" lines={["You may", <em key="e">also love</em>]} />
-        </div>
-        <Reveal className="pgrid" stagger={0.1}>
-          {related.map((p) => (
-            <PieceCard key={p.slug} piece={p} />
-          ))}
-        </Reveal>
-      </section>
-      <CtaBand />
-    </>
+      <Ticker items={TICKER} />
+      <Standards />
+      <Authored />
+      <Documentation />
+      <Reviews />
+      <Faq />
+      <Recommended related={related} />
+      <Ticker items={TICKER} dark />
+    </div>
   );
 }

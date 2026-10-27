@@ -35,20 +35,23 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       if (pending.current) return;
       pending.current = true;
       router.prefetch(url.pathname);
+      // Out: the page softens away under a porcelain veil while the wordmark comes into focus.
       gsap
         .timeline()
-        .set(curtain.current, { yPercent: 100, visibility: "visible" })
-        .fromTo(".curtain__mark > *", { yPercent: 120 }, { yPercent: 0, duration: 0.9, ease: "expo.out", stagger: 0.06 }, 0.35)
-        .to(curtain.current, { yPercent: 0, duration: 0.9, ease: "expo.inOut" }, 0)
+        .set(curtain.current, { visibility: "visible", opacity: 0 })
+        .to("main", { opacity: 0, filter: "blur(6px)", duration: 0.6, ease: "power2.in" }, 0)
+        .to(curtain.current, { opacity: 1, duration: 0.6, ease: "power2.inOut" }, 0.1)
+        .fromTo(".curtain__mark", { opacity: 0, letterSpacing: "0.6em", filter: "blur(10px)" }, { opacity: 1, letterSpacing: "0.32em", filter: "blur(0px)", duration: 1, ease: "power3.out" }, 0.2)
+        .fromTo(".curtain__line", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power2.inOut" }, 0.3)
         .add(() => {
           setReady(false);
           router.push(url.pathname + url.hash);
-        }, 0.95);
+        }, 0.9);
     },
     [pathname, router, lenis]
   );
 
-  // New route committed: jump to top, then lift the curtain.
+  // New route committed: jump to top, then lift the veil.
   useEffect(() => {
     if (!pending.current) return;
     lenis?.scrollTo(0, { immediate: true, force: true });
@@ -56,6 +59,8 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
     const raf = requestAnimationFrame(() => {
       ScrollTrigger.refresh();
       setReady(true);
+      gsap.set("main", { opacity: 1, clearProps: "filter" });
+      // In: the veil lifts by fading, uncovering the new page in place.
       gsap
         .timeline({
           onComplete: () => {
@@ -63,8 +68,10 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
             pending.current = false;
           },
         })
-        .to(".curtain__mark > *", { yPercent: -120, duration: 0.6, ease: "expo.in", stagger: 0.04 })
-        .to(curtain.current, { yPercent: -100, duration: 1, ease: "expo.inOut" }, 0.2);
+        .to(".curtain__mark", { opacity: 0, filter: "blur(8px)", duration: 0.5, ease: "power2.in" })
+        .to(".curtain__line", { scaleX: 0, transformOrigin: "right", duration: 0.5, ease: "power2.in" }, 0)
+        .to(curtain.current, { opacity: 0, duration: 0.9, ease: "power2.inOut" }, 0.25)
+        .set(".curtain__line", { transformOrigin: "left" });
     });
     return () => cancelAnimationFrame(raf);
   }, [pathname, lenis]);
@@ -75,8 +82,9 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       <div ref={curtain} className="curtain" aria-hidden="true">
         <div className="curtain__mark">
           <span>Western</span>
-          <em>Jewellers</em>
+          <small>Jewellers</small>
         </div>
+        <i className="curtain__line" />
       </div>
     </TransitionContext.Provider>
   );

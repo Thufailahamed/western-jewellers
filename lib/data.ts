@@ -13,6 +13,55 @@ export const METALS: Record<Metal, { label: string; color: string; swatch: strin
   rose: { label: "18k Rose Gold", color: "#f1b598", swatch: "linear-gradient(135deg,#f9d3c0,#c2785a)" },
 };
 
+// Configurator. Listed prices are for 18k gold with a natural diamond; every other choice is a share of that.
+/** Of a piece's listed price, the part that is the metal setting (the rest is stones). */
+export const SETTING_SHARE = 0.32;
+
+export type Finish = { id: string; metal: Metal; karat: string; label: string; factor: number };
+export const FINISHES: Finish[] = [
+  ...(["yellow", "white", "rose"] as Metal[]).flatMap((m) =>
+    ([["9k", 0.62], ["14k", 0.8], ["18k", 1]] as const).map(([k, f]) => ({
+      id: `${k}-${m}`,
+      metal: m,
+      karat: k,
+      label: `${k.toUpperCase()} ${METALS[m].label.replace("18k ", "")}`,
+      factor: f,
+    }))
+  ),
+  { id: "platinum", metal: "white", karat: "Platinum", label: "Platinum", factor: 1.18 },
+];
+
+export const STONES = [
+  { id: "natural", label: "Natural Diamond", factor: 1, swatch: "radial-gradient(circle at 35% 30%, #fff, #e6e9ee 45%, #b9bec8)" },
+  { id: "lab", label: "Lab-Grown Diamond", factor: 0.34, swatch: "radial-gradient(circle at 35% 30%, #fff, #eef1f4 45%, #c6ccd4)" },
+  { id: "champagne", label: "Champagne Diamond", factor: 0.82, swatch: "radial-gradient(circle at 35% 30%, #fff6e6, #e7cfa4 45%, #b48c52)" },
+  { id: "sapphire", label: "Blue Sapphire", factor: 0.58, swatch: "radial-gradient(circle at 35% 30%, #a9c1ff, #2f4fb0 50%, #14235a)" },
+] as const;
+
+export const SHAPES = [
+  { id: "round", label: "Round", extra: 0 },
+  { id: "oval", label: "Oval", extra: 0.04 },
+  { id: "emerald", label: "Emerald", extra: 0.03 },
+  { id: "pear", label: "Pear", extra: 0.05 },
+  { id: "cushion", label: "Cushion", extra: 0.03 },
+] as const;
+
+export type StoneId = (typeof STONES)[number]["id"];
+export type ShapeId = (typeof SHAPES)[number]["id"];
+
+/** Price of each part of a configured piece, rounded to the nearest ten. */
+export function configure(price: number, finish: Finish, stone: StoneId, shape: ShapeId) {
+  const r = (n: number) => Math.round(n / 10) * 10;
+  const s = STONES.find((x) => x.id === stone)!;
+  const stones = price * (1 - SETTING_SHARE) * s.factor;
+  const parts = {
+    metal: r(price * SETTING_SHARE * finish.factor),
+    stone: r(stones),
+    shape: r(stones * SHAPES.find((x) => x.id === shape)!.extra),
+  };
+  return { ...parts, total: parts.metal + parts.stone + parts.shape };
+}
+
 export type Piece = {
   slug: string;
   name: string;

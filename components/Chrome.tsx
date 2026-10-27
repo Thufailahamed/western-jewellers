@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useLenis } from "lenis/react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { DEVELOP, gsap, useGSAP } from "@/lib/gsap";
 import { TLink, usePageTransition } from "./Transition";
 import { articles, collections, formatPrice, pieces, piecesIn } from "@/lib/data";
 import type { SwapItem } from "./three/SwapPieces";
@@ -48,9 +48,9 @@ export function Loader() {
       Promise.all([fonts, new Promise((r) => tl.eventCallback("onComplete", r))]).then(() => {
         gsap
           .timeline({ onComplete: () => setDone(true) })
-          .to(".loader__mark span", { yPercent: -110, duration: 0.8, ease: "expo.in", stagger: 0.05 })
+          .to(".loader__mark", { opacity: 0, filter: "blur(10px)", scale: 1.04, duration: 0.8, ease: "power2.in" })
           .to(".loader__bar, .loader__meta", { opacity: 0, duration: 0.4 }, "<")
-          .to(root.current, { clipPath: "inset(0 0 100% 0)", duration: 1.2, ease: "expo.inOut" }, "-=0.2")
+          .to(root.current, { opacity: 0, duration: 1, ease: "power2.inOut" }, "-=0.3")
           .add(() => {
             setReady(true);
             lenisRef.current?.start();
@@ -239,7 +239,7 @@ export function Nav() {
     () => {
       if (!open) return;
       gsap.fromTo(".menu__label", { yPercent: 110, y: 0 }, { yPercent: 0, duration: 1.2, ease: "expo.out", stagger: 0.05, delay: 0.35 });
-      gsap.fromTo(".menu__arch", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "expo.inOut", delay: 0.25 });
+      gsap.fromTo(".menu__arch", DEVELOP.from, { ...DEVELOP.to, duration: 1.2, delay: 0.25 });
       gsap.fromTo(".menu__line", { scaleX: 0 }, { scaleX: 1, duration: 1.4, ease: "expo.inOut", stagger: 0.05, delay: 0.3 });
       gsap.fromTo(
         ".menu__eyebrow, .menu__links small, .menu__kicker, .menu__stage-top, .menu__foot > *, .menu__caption",

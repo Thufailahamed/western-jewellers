@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPiece, formatPrice, METALS } from "@/lib/data";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { DEVELOP, gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { HeroStage, type HeroLayout } from "./three/HeroStage";
 import { JewelView } from "./three/JewelView";
 import { TLink, usePageTransition } from "./Transition";
@@ -78,11 +78,11 @@ export function Hero() {
     () => {
       if (!ready) return;
       const tl = gsap.timeline({ delay: 0.1 });
-      tl.fromTo(".hero__arch-bg", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.8, ease: "expo.inOut" }, 0)
+      tl.fromTo(".hero__arch-bg", DEVELOP.from, { ...DEVELOP.to, duration: 1.8 }, 0)
         .fromTo(intro.current, { v: 0 }, { v: 1, duration: 2.6, ease: "power2.out" }, 0.7)
         .fromTo(".hero__title .ln > span", { yPercent: 110, y: 0 }, { yPercent: 0, duration: 1.6, ease: "expo.out", stagger: 0.09 }, 0.5)
         .fromTo(".hero__fade", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 1.2, ease: "expo.out", stagger: 0.06 }, 0.9)
-        .fromTo(".hero__panel", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.7, ease: "expo.inOut", stagger: 0.12 }, 0.15)
+        .fromTo(".hero__panel", DEVELOP.from, { ...DEVELOP.to, duration: 1.7, stagger: 0.12 }, 0.15)
         .fromTo(".hero__panel-img", { scale: 1.3 }, { scale: 1.06, duration: 2.6, ease: "expo.out", stagger: 0.12 }, 0.4)
         .fromTo(".hero__badge", { opacity: 0, scale: 0.6, rotate: -90 }, { opacity: 1, scale: 1, rotate: 0, duration: 1.6, ease: "expo.out" }, 1.2);
     },

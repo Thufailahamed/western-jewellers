@@ -54,7 +54,7 @@ export function SplitTitle({
   );
 }
 
-/** Fade-and-rise for any block. */
+/** Soft fade-and-focus for any block. */
 export function Reveal({
   children,
   as = "div",
@@ -79,12 +79,13 @@ export function Reveal({
       const targets = stagger ? ref.current!.children : ref.current;
       gsap.fromTo(
         targets,
-        { opacity: 0, y: 36 },
+        { opacity: 0, filter: "blur(8px)" },
         {
           opacity: 1,
-          y: 0,
-          duration: 1.3,
-          ease: "expo.out",
+          filter: "blur(0px)",
+          duration: 1.4,
+          ease: "power2.out",
+          clearProps: "filter",
           delay,
           stagger,
           scrollTrigger: mode === "scroll" ? { trigger: ref.current, start: "top 90%" } : undefined,
@@ -151,7 +152,7 @@ export function Counter({ to, suffix }: { to: number; suffix?: string }) {
 }
 
 /** Endless marquee that speeds up with scroll velocity. */
-export function Marquee({ items }: { items: ReactNode[] }) {
+export function Marquee({ items, label = "Disciplines" }: { items: ReactNode[]; label?: string }) {
   const track = useRef<HTMLDivElement>(null);
   const loop = useRef<gsap.core.Tween | null>(null);
   useGSAP(() => {
@@ -170,7 +171,7 @@ export function Marquee({ items }: { items: ReactNode[] }) {
     </span>
   ));
   return (
-    <section className="marquee" aria-label="Disciplines">
+    <section className="marquee" aria-label={label}>
       <div ref={track} className="marquee__track">
         <div className="marquee__row">{row}</div>
         <div className="marquee__row" aria-hidden="true">{row}</div>

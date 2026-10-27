@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import { METALS, type Metal, type ModelKind } from "@/lib/data";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { DEVELOP, gsap, useGSAP } from "@/lib/gsap";
 import { JewelView } from "./three/JewelView";
 import { Photo } from "./Photo";
 import { IMG, type ImgKey } from "@/lib/images";
@@ -39,7 +39,7 @@ export function BespokeHero() {
     () => {
       if (!ready) return;
       gsap.to(".bhero__seal-svg", { rotate: 360, duration: 30, ease: "none", repeat: -1 });
-      gsap.fromTo(".bhero__img-a", { clipPath: "inset(100% 0% 0% 0% round 999px 999px 0 0)" }, { clipPath: "inset(0% 0% 0% 0% round 999px 999px 0 0)", duration: 1.8, ease: "expo.inOut", delay: 0.2 });
+      gsap.fromTo(".bhero__img-a", DEVELOP.from, { ...DEVELOP.to, duration: 1.8, delay: 0.2 });
       gsap.fromTo([".bhero__img-b", ".bhero__seal", ".bhero__card"], { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.4, ease: "expo.out", stagger: 0.12, delay: 1 });
 
       const st = { trigger: root.current, start: "top top", end: "bottom top", scrub: true };

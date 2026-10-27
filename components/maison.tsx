@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useRef, useState } from "react";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { DEVELOP, gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { Photo } from "./Photo";
 import { IMG, type ImgKey } from "@/lib/images";
 import { JewelView } from "./three/JewelView";
@@ -42,7 +42,7 @@ export function MaisonHero() {
 
       if (!ready) return;
       gsap.fromTo(q(".mhero__word .ln > span"), { yPercent: 110, y: 0 }, { yPercent: 0, duration: 1.5, ease: "expo.out", stagger: 0.12, delay: 0.15 });
-      gsap.fromTo(q(".mhero__reveal"), { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.6, ease: "expo.inOut" });
+      gsap.fromTo(q(".mhero__reveal"), DEVELOP.from, DEVELOP.to);
       gsap.fromTo(q(".mhero__meta"), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out", stagger: 0.08, delay: 0.7 });
     },
     { scope: root, dependencies: [ready] }

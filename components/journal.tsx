@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { articles, type Article } from "@/lib/data";
 import { IMG } from "@/lib/images";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { DEVELOP, gsap, useGSAP } from "@/lib/gsap";
 import { Photo } from "./Photo";
 import { TLink, usePageTransition } from "./Transition";
 import { Reveal, SplitTitle } from "./anim";
@@ -24,7 +24,7 @@ export function JournalCover() {
       gsap.fromTo(".jcover__word .ch", { yPercent: 105 }, { yPercent: 0, duration: 1.5, ease: "expo.out", stagger: 0.05, delay: 0.1 });
       gsap.fromTo(".jcover__the", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1.2, ease: "expo.out", delay: 0.6 });
       gsap.fromTo(".jcover__mast > *", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 1, ease: "expo.out", stagger: 0.08, delay: 0.3 });
-      gsap.fromTo(".jcover__lead .photo", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.6, ease: "expo.inOut", delay: 0.5 });
+      gsap.fromTo(".jcover__lead .photo", DEVELOP.from, { ...DEVELOP.to, delay: 0.5 });
       gsap.fromTo(".jcover__side > *", { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 1.2, ease: "expo.out", stagger: 0.07, delay: 0.9 });
       // The masthead drifts up and fades as the cover story takes over.
       gsap.to(".jcover__word", { yPercent: -18, opacity: 0.25, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "60% top", scrub: true } });

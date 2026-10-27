@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Image, { type ImageLoader } from "next/image";
 import type { Img } from "@/lib/images";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { DEVELOP, gsap, useGSAP } from "@/lib/gsap";
 
 // Unsplash resizes on its own CDN, so we ask it for the width Next would have requested.
 const unsplash: ImageLoader = ({ src, width, quality }) => `${src}?auto=format&fit=crop&w=${width}&q=${quality ?? 75}`;
@@ -20,7 +20,7 @@ type Props = {
   children?: React.ReactNode;
 };
 
-/** A framed photograph: wipes open on first view and drifts slightly inside its frame while scrolling. */
+/** A framed photograph: develops into focus on first view and drifts slightly inside its frame while scrolling. */
 export function Photo({ img, className, sizes = "100vw", parallax = 0.08, reveal = true, priority, children }: Props) {
   const root = useRef<HTMLDivElement>(null);
   useGSAP(
@@ -28,12 +28,9 @@ export function Photo({ img, className, sizes = "100vw", parallax = 0.08, reveal
       const el = root.current!;
       const inner = el.querySelector(".photo__inner");
       if (reveal) {
-        gsap.fromTo(
-          el,
-          { clipPath: "inset(100% 0% 0% 0%)" },
-          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: "expo.inOut", scrollTrigger: { trigger: el, start: "top 88%", once: true } }
-        );
-        gsap.fromTo(el.querySelector("img"), { scale: 1.25 }, { scale: 1, duration: 2, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } });
+        const st = { trigger: el, start: "top 90%", once: true };
+        gsap.fromTo(el, DEVELOP.from, { ...DEVELOP.to, scrollTrigger: st });
+        gsap.fromTo(el.querySelector("img"), { scale: 1.12 }, { scale: 1, duration: 2.4, ease: "power3.out", scrollTrigger: st });
       }
       if (parallax && inner) {
         gsap.fromTo(
